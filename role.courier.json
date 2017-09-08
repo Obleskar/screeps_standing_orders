@@ -1,0 +1,70 @@
+var roleUpgrader = require('role.upgrader');
+
+module.exports = {
+    run: function(creep) {
+        
+        //****************************************************************************
+        //working/not working:
+        
+        //if no energy, then set to not working
+        if (creep.memory.working == true && creep.carry.energy == 0) {
+            creep.memory.working = false;
+        }
+        //if energy full, then set to working
+        else if (creep.memory.working == false && creep.carry.energy == creep.carryCapacity) {
+            creep.memory.working = true;
+        }
+        
+        //****************************************************************************
+        //find empty containers
+            //NOTE: use "find_structures", not "find_my_structures"
+            //to find containers because they aren't owned
+        var box = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                filter: (s) => (s.structureType == STRUCTURE_CONTAINER)
+                && (s.store[RESOURCE_ENERGY] > 250)
+        });
+        
+        //find empty storage
+        var silo = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+                filter: (s) => (s.structureType == STRUCTURE_STORAGE)
+                && (s.store[RESOURCE_ENERGY] < s.storeCapacity)
+        });
+        
+        //var ext OR part of silo
+        
+        //****************************************************************************
+        
+        //if has energy and no empty boxes found
+        //if (creep.memory.working == true && box != undefined) {
+        //    roleUpgrader.run(creep);
+        //}
+        
+        //if has energy, dump to silo
+            //***make this an else-if to add upgrader code above
+        if (creep.memory.working == true && box != undefined) {
+            //if empty silo found
+            if (silo != undefined) {
+                //dump energy to silo
+                if (creep.transfer(silo, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(silo);
+                }
+            }
+        }
+        //if not working, get energy from containers**********************************
+        
+        //if no energy and boxes are full
+        else if (creep.memory.working == false && box != undefined) {
+            //if box found
+            if (box != undefined) {
+                //get energy from box
+                if (creep.withdraw(box, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(box);
+                }
+            }
+        }
+        //if no energy and boxes are empty
+        else {
+            roleUpgrader.run(creep);
+        }
+    }
+};

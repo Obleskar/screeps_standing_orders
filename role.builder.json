@@ -1,0 +1,34 @@
+var roleUpgrader = require('role.upgrader');
+
+module.exports = {
+    run: function(creep) {
+        //if no energy, then set to not working
+        if (creep.memory.working == true && creep.carry.energy == 0) {
+            creep.memory.working = false;
+        }
+        //if energy full, then set to working
+        else if (creep.memory.working == false && creep.carry.energy == creep.carryCapacity) {
+        creep.memory.working = true;
+        }
+        //if working, then transfer to con. site
+        if (creep.memory.working == true) {
+            var constructionSite = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
+            if (constructionSite != undefined) {
+                if (creep.build(constructionSite) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(constructionSite);
+                }
+            }
+            else {
+                //BUILDER BECOMES UPGRADER
+                roleUpgrader.run(creep);
+            }
+        }
+        //if nothing, then harvest, if err range, then move to source
+        else {
+            var source = creep.pos.findClosestByPath(FIND_SOURCES);
+            if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(source);
+            }
+        }
+    }
+};

@@ -1,0 +1,106 @@
+module.exports = function() {
+    //big creeps
+    StructureSpawn.prototype.createCustomCreep = 
+        function(energy, roleName) {
+            var numberOfParts = Math.floor(energy / 200);
+            if (numberOfParts > 20) { //********GOVERNOR
+                numberOfParts = 20; //*********GOVERNOR
+            } //********************************GOVERNOR
+            var body = [];
+            for (let i = 0; i < numberOfParts; i++) {
+                body.push(WORK);
+            }
+            for (let i = 0; i < numberOfParts; i++) {
+                body.push(CARRY);
+            }
+            for (let i = 0; i < numberOfParts; i++) {
+                body.push(MOVE);
+            }
+            return this.createCreep(body, undefined, {role: roleName, working: false});
+        };
+    
+    //long distance harvester creeps
+    StructureSpawn.prototype.createLongDistanceHarvester = 
+        function(energy, numberOfWorkParts, home, target, sourceIndex) {
+            var body = [];
+            var numberOfParts = Math.floor(energy / 100);    
+            
+            //subtract cost of work part (100) and the
+            //move part (50) needed to "push it"
+            energy -= 150 * numberOfWorkParts;
+            
+            for (let i = 0; i < numberOfWorkParts; i++) {
+                body.push(WORK);
+            }
+        
+            var numberOfParts = Math.floor(energy / 100);
+            for (let i = 0; i < numberOfParts; i++) {
+                body.push(CARRY);
+            }
+            for (let i = 0; i < numberOfParts + numberOfWorkParts; i++) {
+                body.push(MOVE);
+            }
+        
+            //create the creep with the created body and the given role
+            return this.createCreep(body, undefined, {
+                role: 'longDistanceHarvester', 
+                home: home, 
+                target: target, 
+                sourceIndex: sourceIndex,
+                working: false});
+        };
+    
+    //attack creeps
+    StructureSpawn.prototype.createAttacker = 
+        function(energy, roleName, home, target) {
+            var body = [];
+            var numberOfParts = Math.floor(energy / 200);
+        
+            if (numberOfParts > 10) { //********GOVERNOR
+                numberOfParts = 10; //*********GOVERNOR
+            } //********************************GOVERNOR
+        
+            
+            for (let i = 0; i < numberOfParts; i++) {
+                body.push(TOUGH);
+            }
+            for (let i = 0; i < numberOfParts; i++) {
+                body.push(ATTACK);
+            }
+            for (let i = 0; i < numberOfParts; i++) {
+                body.push(MOVE);
+            }
+            return this.createCreep(body, undefined, {
+                role: roleName, 
+                home: home, 
+                target: target,
+                working: false});
+        };
+    
+    //claimer creeps
+    StructureSpawn.prototype.createClaimer = 
+        function(energy, roleName, home, target) {
+            var body = [];
+            var numberOfParts = Math.floor(energy / 200);
+        
+            if (numberOfParts > 20) { //********GOVERNOR
+                numberOfParts = 20; //*********GOVERNOR
+            } //********************************GOVERNOR
+        
+            //for (let i = 0; i < numberOfParts; i++) {
+            //    body.push(TOUGH);
+            //}
+            for (let i = 0; i < numberOfParts; i++) {
+                body.push(CLAIM);
+            }
+            for (let i = 0; i < numberOfParts; i++) {
+                body.push(MOVE);
+            }
+            return this.createCreep(body, undefined, {
+                role: roleName, 
+                home: home, 
+                target: target,
+                working: false});
+        };
+    };
+

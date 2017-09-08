@@ -1,0 +1,66 @@
+module.exports = {
+    run: function(creep) {
+        //if no energy, then set to not working
+        if (creep.memory.working == true && creep.carry.energy == 0) {
+            creep.memory.working = false;
+        }
+        //if energy full, then set to working
+        else if (creep.memory.working == false && creep.carry.energy == creep.carryCapacity) {
+            creep.memory.working = true;
+        }
+        //if working, then transfer to spawn, if err, then move to spawn
+        if (creep.memory.working == true) {
+            //if in home room
+            if (creep.room.name == creep.memory.home) {
+                //find a worthy structure
+                var structure = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+                    filter: (s) => (s.structureType == STRUCTURE_SPAWN
+                                || s.structureType == STRUCTURE_EXTENSION
+                                || s.structureType == STRUCTURE_TOWER
+                                ) 
+                                && s.energy < s.energyCapacity    
+                });
+                var silo = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+                filter: (s) => (
+                    s.structureType == STRUCTURE_CONTAINER
+                    || s.structureType == STRUCTURE_STORAGE
+                )
+                && (
+                    s.store.energy < s.storeCapacity
+                )
+                });
+                //transfer energy to found structure
+                if (structure != undefined) {
+                    if (creep.transfer(structure, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(structure);
+                    }
+                }
+                else {
+                    if (creep.transfer(silo, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(silo);
+                    }
+                }
+            }
+            //if not in home room, go to home room
+            else {
+                var exit = creep.room.findExitTo(creep.memory.home);
+                creep.moveTo(creep.pos.findClosestByRange(exit));
+            }
+        }
+        //if not working, then harvest, if err range, then move to source
+        else {
+            if (creep.room.name == creep.memory.target) {
+                //var source = creep.room.find(FIND_SOURCES)[creep.memory.sourceIndex];
+                var source = creep.pos.findClosestByPath(FIND_SOURCES);
+                if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(source);
+                }
+            }
+            //move to target room
+            else {
+                var exit = creep.room.findExitTo(creep.memory.target);
+                creep.moveTo(creep.pos.findClosestByRange(exit));
+            }
+        }
+    }
+};

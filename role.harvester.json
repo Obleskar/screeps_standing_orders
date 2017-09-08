@@ -1,0 +1,71 @@
+module.exports = {
+    run: function(creep) {
+        //if no energy, then set to not working
+        if (creep.memory.working == true && creep.carry.energy == 0) {
+            creep.memory.working = false;
+        }
+        //if energy full, then set to working
+        else if (creep.memory.working == false && creep.carry.energy == creep.carryCapacity) {
+        creep.memory.working = true;
+        }
+        //if working, then transfer to spawn, if err, then move to spawn
+        if (creep.memory.working == true) {
+            //structure: 1. Spawn 2. Extension 3. Tower
+            var structure = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+                filter: (s) => (
+                        s.structureType == STRUCTURE_SPAWN
+                        || s.structureType == STRUCTURE_EXTENSION
+                        || s.structureType == STRUCTURE_TOWER
+                    ) 
+                    && (
+                        s.energy < s.energyCapacity
+                    )
+            });
+            //silo: Storage
+            var silo = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+                filter: (s) => (
+                    s.structureType == STRUCTURE_STORAGE
+                )
+                && (
+                    s.store.energy < s.storeCapacity
+                )
+            });
+            //box: Container
+            var box = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                filter: (s) => (
+                    s.structureType == STRUCTURE_CONTAINER
+                )
+                && (
+                    s.store.energy < s.storeCapacity
+                )
+            });
+            //transfer priorities:
+            //1. Container, 2. Structure, 3. Silo
+            if (box != undefined) {
+                if (creep.transfer(box, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(box);
+                }
+            }
+            else {
+                //
+                if (creep.transfer(structure, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(structure);
+                    if (creep.transfer(structure, RESOURCE_ENERGY) ==
+                        ERR_NOT_ENOUGH_RESOURCES) {
+                            if (creep.transfer(silo, RESOURCE_ENERGY) ==
+                                ERR_NOT_IN_RANGE) {
+                                    creep.moveTo(silo);
+                            }
+                    }
+                }
+            }
+        }
+        //if nothing, then harvest, if err range, then move to source
+        else {
+            var source = creep.pos.findClosestByPath(FIND_SOURCES);
+            if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(source);
+            }
+        }
+    }
+};

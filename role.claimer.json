@@ -1,0 +1,36 @@
+module.exports = {
+    run: function(creep) {
+        //if working, then cease fire and RTB
+        if (creep.memory.working == true) {
+            console.log("Attacker is working?")
+            //if in home room, move to rally point
+            //if (creep.room.name == creep.memory.home) {
+            //    console.log("Cease fire. Awaiting orders.");
+            //}
+            //if not in home room, go to home room
+            //else {
+            //    var exit = creep.room.findExitTo(creep.memory.home);
+            //    creep.moveTo(creep.pos.findClosestByRange(exit));
+           // }
+        }
+        //if not working, then attack, if err range, then move to target
+        else {
+            if (creep.room.name == creep.memory.target) {
+                var target = creep.pos.findClosestByPath(
+                    FIND_HOSTILE_STRUCTURES, {
+                        filter: (s) => 
+                            s.structureType == STRUCTURE_CONTROLLER  
+                    });
+            }
+            if (creep.attackController(target) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(target);
+            }
+            //move to target room
+            else {
+                //console.log("Moving to target room!");
+                var exit = creep.room.findExitTo(creep.memory.target);
+                creep.moveTo(creep.pos.findClosestByRange(exit));
+            }
+        }
+    }
+};
